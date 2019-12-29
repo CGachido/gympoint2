@@ -12,6 +12,8 @@ class Student extends Model {
       },
       { sequelize }
     );
+
+    return this;
   }
 }
 

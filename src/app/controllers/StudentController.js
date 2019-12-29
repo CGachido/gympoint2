@@ -61,9 +61,9 @@ class StudentController {
       }
     }
 
-    const { id, name, age, weight, height } = await student.update(req.body);
+    await student.update(req.body);
 
-    return res.json({ id, name, email, age, weight, height });
+    return res.json(student);
   }
 }
 
