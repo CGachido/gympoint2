@@ -15,7 +15,7 @@ class UserController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+      return res.status(400).json({ error: 'Falha na validação dos dados' });
     }
 
     const userExists = await User.findOne({
@@ -25,7 +25,7 @@ class UserController {
     });
 
     if (userExists) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'Usuário já cadastrado' });
     }
 
     const { id, name, email } = await User.create(req.body);
@@ -49,7 +49,7 @@ class UserController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+      return res.status(400).json({ error: 'Falha na validação dos dados' });
     }
 
     const { email, oldPassword } = req.body;
@@ -63,12 +63,12 @@ class UserController {
       });
 
       if (userExists) {
-        return res.status(400).json({ error: 'User already exists.' });
+        return res.status(400).json({ error: 'Usuário já cadastrado' });
       }
     }
 
     if (oldPassword && !(await user.checkPassword(oldPassword))) {
-      return res.status(400).json({ error: 'Password doesnt match' });
+      return res.status(400).json({ error: 'As senhas não correspondem' });
     }
 
     const { id, name } = await user.update(req.body);
