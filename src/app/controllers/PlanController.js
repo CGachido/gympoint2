@@ -52,7 +52,8 @@ class PlanController {
     }
 
     const { title } = req.body;
-    const plan = await Plan.findByPk(req.params.id);
+    const { planId } = req.params;
+    const plan = await Plan.findByPk(planId);
 
     if (!plan) {
       return res.status(400).json({ error: 'Plano não encontrado' });
@@ -77,7 +78,8 @@ class PlanController {
   }
 
   async delete(req, res) {
-    const plan = await Plan.findByPk(req.params.id);
+    const { planId } = req.params;
+    const plan = await Plan.findByPk(planId);
 
     if (!plan) {
       return res.status(400).json({ error: 'Plano não encontrado' });

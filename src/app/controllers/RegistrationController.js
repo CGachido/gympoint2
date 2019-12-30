@@ -4,6 +4,10 @@ import { Op } from 'sequelize';
 
 import Registration from '../models/Registration';
 import Plan from '../models/Plan';
+import Student from '../models/Student';
+
+import RegistrationMail from '../jobs/RegistrationMail';
+import Queue from '../../lib/Queue';
 
 class RegistrationController {
   async index(req, res) {
@@ -53,12 +57,28 @@ class RegistrationController {
 
     const plan = await Plan.findByPk(plan_id);
 
+    if (!plan) {
+      return res.status(400).json({ error: 'Plano não encontrado' });
+    }
+
+    const student = await Student.findByPk(student_id);
+
+    if (!student) {
+      return res.status(400).json({ error: 'Estudante não encontrado' });
+    }
+
     const registration = await Registration.create({
       student_id,
       plan_id,
       start_date,
       end_date: addMonths(startDate, plan.duration),
       price: plan.price * plan.duration,
+    });
+
+    await Queue.add(RegistrationMail.key, {
+      registration,
+      student,
+      plan,
     });
 
     return res.json(registration);
@@ -77,7 +97,8 @@ class RegistrationController {
 
     const { start_date, student_id, plan_id } = req.body;
     const startDate = parseISO(start_date);
-    const registration = await Registration.findByPk(req.params.id);
+    const { registrationId } = req.params;
+    const registration = await Registration.findByPk(registrationId);
     const plan = await Plan.findByPk(plan_id);
 
     await registration.update({
@@ -92,7 +113,8 @@ class RegistrationController {
   }
 
   async delete(req, res) {
-    const registration = await Registration.findByPk(req.params.id);
+    const { registrationId } = req.params;
+    const registration = await Registration.findByPk(registrationId);
 
     if (!registration) {
       return res.status(400).json({ error: 'Matrícula não encontrada' });
