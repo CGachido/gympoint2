@@ -8,10 +8,21 @@ import Checkin from '../models/Checkin';
 class CheckinController {
   async index(req, res) {
     const { studentId } = req.params;
+    const { page = 1 } = req.query;
     const checkins = await Checkin.findAll({
       where: {
         student_id: studentId,
       },
+      limit: 20,
+      offset: (page - 1) * 20,
+      order: ['created_at'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['name', 'email'],
+        },
+      ],
     });
 
     return res.json(checkins);
@@ -30,6 +41,9 @@ class CheckinController {
       where: {
         canceled_at: null,
         student_id: studentId,
+        start_date: {
+          [Op.lte]: today,
+        },
         end_date: {
           [Op.gte]: today,
         },

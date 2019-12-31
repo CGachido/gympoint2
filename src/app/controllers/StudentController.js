@@ -6,6 +6,7 @@ import Student from '../models/Student';
 class StudentController {
   async index(req, res) {
     const { q } = req.query;
+    const { page = 1 } = req.query;
 
     const students = await Student.findAll({
       where: {
@@ -13,6 +14,9 @@ class StudentController {
           [Op.iLike]: `%${q}%`,
         },
       },
+      limit: 20,
+      offset: (page - 1) * 20,
+      order: ['name'],
     });
 
     return res.json(students);

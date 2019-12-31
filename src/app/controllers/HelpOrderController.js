@@ -6,6 +6,7 @@ import Student from '../models/Student';
 class HelpOrderController {
   async index(req, res) {
     const { studentId } = req.params;
+    const { page = 1 } = req.query;
 
     let where = {
       answer_at: null,
@@ -25,6 +26,16 @@ class HelpOrderController {
 
     const helpOrders = await HelpOrder.findAll({
       where,
+      limit: 20,
+      offset: (page - 1) * 20,
+      order: ['created_at'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['name', 'email'],
+        },
+      ],
     });
 
     return res.json(helpOrders);

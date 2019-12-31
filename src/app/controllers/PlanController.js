@@ -4,10 +4,14 @@ import Plan from '../models/Plan';
 
 class PlanController {
   async index(req, res) {
+    const { page = 1 } = req.query;
     const plans = await Plan.findAll({
       where: {
         canceled_at: null,
       },
+      limit: 20,
+      offset: (page - 1) * 20,
+      order: ['created_at'],
     });
 
     return res.json(plans);

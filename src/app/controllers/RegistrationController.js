@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { isBefore, parseISO, addMonths } from 'date-fns';
+import { isBefore, parseISO, addMonths, subDays } from 'date-fns';
 import { Op } from 'sequelize';
 
 import Registration from '../models/Registration';
@@ -11,11 +11,28 @@ import Queue from '../../lib/Queue';
 
 class RegistrationController {
   async index(req, res) {
+    const { page = 1 } = req.query;
+
     const registrations = await Registration.findAll({
       attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
       where: {
         canceled_at: null,
       },
+      limit: 20,
+      offset: (page - 1) * 20,
+      order: ['created_at'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['name', 'email'],
+        },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['title'],
+        },
+      ],
     });
 
     return res.json(registrations);
@@ -34,7 +51,7 @@ class RegistrationController {
     const { start_date, student_id, plan_id } = req.body;
     const startDate = parseISO(start_date);
 
-    if (isBefore(startDate, new Date())) {
+    if (isBefore(startDate, subDays(new Date(), 1))) {
       return res.status(400).json({
         error: 'Não é possível realizar uma nova matrícula com data passada',
       });
